@@ -133,7 +133,10 @@
 
     var opened = null;
     try {
-      opened = window.open(url, '_blank', 'noopener');
+      opened = window.open(url, '_blank');
+      if (opened) {
+        try { opened.opener = null; } catch (e) {}
+      }
     } catch (e) {}
 
     if (!opened) {
