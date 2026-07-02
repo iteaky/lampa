@@ -81,14 +81,13 @@ https://iteaky.github.io/lampa/lampa-offline-mvp.js
 lampa-offline-mvp.js
 ```
 
-Проверка:
+Проверка синтаксиса:
 
 ```bash
 node --check lampa-offline-mvp.js
-node test-init.js
 ```
 
-`test-init.js` проверяет регистрацию плагина и перехват запуска плеера в минимальном mock-окружении. Реальную загрузку нужно тестировать внутри Lampa, поскольку она зависит от CORS, WebView и доступного хранилища.
+Реальную загрузку нужно тестировать внутри Lampa, поскольку она зависит от CORS, WebView и доступного хранилища.
 
 ## Лицензия
 
