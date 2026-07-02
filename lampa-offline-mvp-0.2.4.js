@@ -5,6 +5,7 @@
   var BASE_URL = 'https://cdn.jsdelivr.net/gh/iteaky/lampa@main/lampa-offline-mvp-0.2.3.js';
   var installed = false;
   var lastTouchAt = 0;
+  var touchState = null;
 
   function log() {
     try {
@@ -40,9 +41,10 @@
 
   function focusItem(item) {
     try {
-      document.querySelectorAll('.offline-hls__item.focus').forEach(function (element) {
-        if (element !== item) element.classList.remove('focus');
-      });
+      var focused = document.querySelectorAll('.offline-hls__item.focus');
+      for (var index = 0; index < focused.length; index += 1) {
+        if (focused[index] !== item) focused[index].classList.remove('focus');
+      }
     } catch (e) {}
 
     try {
@@ -85,13 +87,45 @@
     }, 0);
   }
 
+  function readTouch(event) {
+    var list = event.changedTouches && event.changedTouches.length ? event.changedTouches : event.touches;
+    return list && list.length ? list[0] : null;
+  }
+
   function installTouchCompatibility() {
     if (installed) return;
     installed = true;
 
+    document.addEventListener('touchstart', function (event) {
+      var item = findItem(event.target);
+      var touch = readTouch(event);
+      touchState = item && touch ? {
+        item: item,
+        x: touch.clientX,
+        y: touch.clientY,
+        moved: false
+      } : null;
+    }, { capture: true, passive: true });
+
+    document.addEventListener('touchmove', function (event) {
+      if (!touchState) return;
+      var touch = readTouch(event);
+      if (!touch) return;
+      if (Math.abs(touch.clientX - touchState.x) > 12 || Math.abs(touch.clientY - touchState.y) > 12) {
+        touchState.moved = true;
+      }
+    }, { capture: true, passive: true });
+
     document.addEventListener('touchend', function (event) {
-      activateItem(event, 'touch');
+      var item = findItem(event.target);
+      var isTap = touchState && !touchState.moved && item && item === touchState.item;
+      touchState = null;
+      if (isTap) activateItem(event, 'touch');
     }, { capture: true, passive: false });
+
+    document.addEventListener('touchcancel', function () {
+      touchState = null;
+    }, { capture: true, passive: true });
 
     document.addEventListener('click', function (event) {
       activateItem(event, 'click');
